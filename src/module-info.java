@@ -1,8 +1,5 @@
-/**
- * 
- */
-/**
- * 
- */
-module proyecto_fundamentos_programacion {
+
+
+public class module {
+
 }

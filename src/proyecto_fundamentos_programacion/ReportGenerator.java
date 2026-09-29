@@ -13,15 +13,13 @@ import java.util.Map;
 public class ReportGenerator {
 
 	/**
-	 * Generates a report containing the total amount of money collected by each
-	 * salesman.
+	 * Generates a report containing all salesmen sorted by the total amount of
+	 * money collected, from highest to lowest.
 	 *
-	 * The report is sorted from the highest to the lowest amount collected.
-	 *
-	 * @param salesmen        map containing the salesmen indexed by document number
-	 * @param salesBySalesman map containing the sales grouped by salesman
-	 * @param outputFilePath  path where the report will be created
-	 * @throws IOException if the report cannot be created
+	 * @param salesmen        all registered salesmen
+	 * @param salesBySalesman sales grouped by salesman
+	 * @param outputFilePath  path where the report will be generated
+	 * @throws IOException if the report cannot be written
 	 */
 	public void generateSalesmanReport(Map<Long, Salesman> salesmen, Map<Long, List<Sale>> salesBySalesman,
 			String outputFilePath) throws IOException {
@@ -54,7 +52,7 @@ public class ReportGenerator {
 	/**
 	 * Calculates the total amount collected by a salesman.
 	 *
-	 * @param sales list of sales
+	 * @param sales sales made by the salesman
 	 * @return total amount collected
 	 */
 	private double calculateSalesmanTotal(List<Sale> sales) {
@@ -75,8 +73,8 @@ public class ReportGenerator {
 	/**
 	 * Writes the salesman report to a CSV file.
 	 *
-	 * @param reportEntries  entries to write
-	 * @param outputFilePath path of the output file
+	 * @param reportEntries  sorted salesman information
+	 * @param outputFilePath path where the report will be generated
 	 * @throws IOException if the file cannot be written
 	 */
 	private void writeSalesmanReport(List<SalesmanReportEntry> reportEntries, String outputFilePath)
@@ -94,17 +92,16 @@ public class ReportGenerator {
 	}
 
 	/**
-	 * Generates a report containing the products sold, sorted by the quantity sold
-	 * in descending order.
+	 * Generates a report containing the products sold, sorted by total quantity
+	 * sold from highest to lowest.
 	 *
-	 * The report contains the product name and unit price.
-	 *
-	 * @param salesBySalesman map containing all sales grouped by salesman
-	 * @param outputFilePath  path where the report will be created
-	 * @throws IOException if the report cannot be created
+	 * @param products        all available products
+	 * @param salesBySalesman sales grouped by salesman
+	 * @param outputFilePath  path where the report will be generated
+	 * @throws IOException if the report cannot be written
 	 */
-	public void generateProductsReport(Map<Long, List<Sale>> salesBySalesman, String outputFilePath)
-			throws IOException {
+	public void generateProductsReport(Map<Integer, Product> products, Map<Long, List<Sale>> salesBySalesman,
+			String outputFilePath) throws IOException {
 
 		Map<Integer, Integer> quantitiesByProduct = calculateProductQuantities(salesBySalesman);
 
@@ -124,14 +121,14 @@ public class ReportGenerator {
 			}
 		});
 
-		writeProductsReport(productQuantities, salesBySalesman, outputFilePath);
+		writeProductsReport(products, productQuantities, outputFilePath);
 	}
 
 	/**
-	 * Calculates the total quantity sold for each product.
+	 * Calculates the total quantity sold for every product.
 	 *
-	 * @param salesBySalesman map containing all sales
-	 * @return map containing product IDs and their quantities sold
+	 * @param salesBySalesman sales grouped by salesman
+	 * @return quantities grouped by product ID
 	 */
 	private Map<Integer, Integer> calculateProductQuantities(Map<Long, List<Sale>> salesBySalesman) {
 
@@ -156,15 +153,17 @@ public class ReportGenerator {
 	/**
 	 * Writes the products report to a CSV file.
 	 *
-	 * @param productQuantities products and their quantities sold
-	 * @param salesBySalesman   all sales grouped by salesman
-	 * @param outputFilePath    path of the output file
+	 * Each line contains:
+	 *
+	 * ProductName;ProductPrice
+	 *
+	 * @param products          all available products
+	 * @param productQuantities products sorted by quantity sold
+	 * @param outputFilePath    path where the report will be generated
 	 * @throws IOException if the file cannot be written
 	 */
-	private void writeProductsReport(List<ProductQuantity> productQuantities, Map<Long, List<Sale>> salesBySalesman,
+	private void writeProductsReport(Map<Integer, Product> products, List<ProductQuantity> productQuantities,
 			String outputFilePath) throws IOException {
-
-		Map<Integer, Product> products = getProducts(salesBySalesman);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))) {
 
@@ -172,34 +171,15 @@ public class ReportGenerator {
 
 				Product product = products.get(productQuantity.getProductId());
 
+				if (product == null) {
+					continue;
+				}
+
 				writer.write(product.getName() + ";" + product.getPrice());
 
 				writer.newLine();
 			}
 		}
-	}
-
-	/**
-	 * Creates a map containing all products found in the sales.
-	 *
-	 * @param salesBySalesman all sales grouped by salesman
-	 * @return map of products indexed by ID
-	 */
-	private Map<Integer, Product> getProducts(Map<Long, List<Sale>> salesBySalesman) {
-
-		Map<Integer, Product> products = new HashMap<Integer, Product>();
-
-		for (List<Sale> sales : salesBySalesman.values()) {
-
-			for (Sale sale : sales) {
-
-				Product product = sale.getProduct();
-
-				products.put(product.getId(), product);
-			}
-		}
-
-		return products;
 	}
 
 	/**

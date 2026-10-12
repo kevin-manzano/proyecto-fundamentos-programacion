@@ -9,33 +9,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Reads and validates sales files.
+ */
 public class SalesReader {
 
 	/**
-	 * Reads all sales files from a directory.
+	 * Reads sales files from a directory.
 	 *
-	 * Each sales file must have the following format:
+	 * Each file must start with: DocumentType;DocumentNumber
 	 *
-	 * DocumentType;DocumentNumber ProductId;Quantity ProductId;Quantity ...
+	 * Following lines must contain: ProductID;Quantity
 	 *
-	 * @param directoryPath path of the directory containing the sales files
-	 * @param products      map containing the available products
-	 * @return a map containing the sales grouped by salesman document number
-	 * @throws IOException if a file cannot be read
+	 * @param directoryPath path of the sales directory
+	 * @param products      available products indexed by ID
+	 * @return sales grouped by salesman document number
+	 * @throws IOException              if files cannot be read
+	 * @throws IllegalArgumentException if the data is invalid
 	 */
 	public Map<Long, List<Sale>> readSales(String directoryPath, Map<Integer, Product> products) throws IOException {
 
-		Map<Long, List<Sale>> salesBySalesman = new HashMap<Long, List<Sale>>();
-
 		File directory = new File(directoryPath);
+
+		if (!directory.exists() || !directory.isDirectory()) {
+			throw new IOException("The sales directory does not exist: " + directoryPath);
+		}
 
 		File[] files = directory.listFiles();
 
 		if (files == null) {
-			return salesBySalesman;
+			throw new IOException("Unable to access the sales directory: " + directoryPath);
 		}
 
+		Map<Long, List<Sale>> salesBySalesman = new HashMap<Long, List<Sale>>();
+
 		for (File file : files) {
+			if (file.isDirectory()) {
+				continue;
+			}
 
 			if (!file.isFile()) {
 				continue;
@@ -47,68 +58,99 @@ public class SalesReader {
 		return salesBySalesman;
 	}
 
-	/**
-	 * Reads a single sales file.
-	 *
-	 * @param file            sales file
-	 * @param products        map containing the available products
-	 * @param salesBySalesman map where sales are grouped by salesman
-	 * @throws IOException if the file cannot be read
-	 */
 	private void readSalesFile(File file, Map<Integer, Product> products, Map<Long, List<Sale>> salesBySalesman)
 			throws IOException {
 
+		String filePath = file.getPath();
+
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
-			String salesmanLine = reader.readLine();
+			String header = reader.readLine();
 
-			if (salesmanLine == null) {
-				return;
+			if (header == null) {
+				throw invalidLine(filePath, 1, "The sales file cannot be empty.");
 			}
 
-			String[] salesmanData = salesmanLine.split(";");
+			String[] salesmanData = header.split(";", -1);
 
-			long salesmanId = Long.parseLong(salesmanData[1]);
+			if (salesmanData.length != 2 || salesmanData[0].trim().isEmpty()) {
+
+				throw invalidLine(filePath, 1, "Expected header: DocumentType;DocumentNumber.");
+			}
+
+			long salesmanId;
+
+			try {
+				salesmanId = Long.parseLong(salesmanData[1].trim());
+			} catch (NumberFormatException e) {
+				throw invalidLine(filePath, 1, "Salesman document number must be an integer.");
+			}
+
+			if (salesmanId <= 0) {
+				throw invalidLine(filePath, 1, "Salesman document number must be greater than zero.");
+			}
 
 			List<Sale> sales = new ArrayList<Sale>();
 
 			String line;
+			int lineNumber = 1;
 
 			while ((line = reader.readLine()) != null) {
+				lineNumber++;
 
 				if (line.trim().isEmpty()) {
 					continue;
 				}
 
-				Sale sale = parseSale(line, products);
+				String[] data = line.split(";", -1);
 
-				sales.add(sale);
+				if (data.length != 2) {
+					throw invalidLine(filePath, lineNumber, "Expected 2 fields: ProductID;Quantity.");
+				}
+
+				int productId;
+				int quantity;
+
+				try {
+					productId = Integer.parseInt(data[0].trim());
+				} catch (NumberFormatException e) {
+					throw invalidLine(filePath, lineNumber, "Product ID must be an integer.");
+				}
+
+				try {
+					quantity = Integer.parseInt(data[1].trim());
+				} catch (NumberFormatException e) {
+					throw invalidLine(filePath, lineNumber, "Quantity must be an integer.");
+				}
+
+				if (productId <= 0) {
+					throw invalidLine(filePath, lineNumber, "Product ID must be greater than zero.");
+				}
+
+				if (quantity <= 0) {
+					throw invalidLine(filePath, lineNumber, "Quantity must be greater than zero.");
+				}
+
+				Product product = products.get(productId);
+
+				if (product == null) {
+					throw invalidLine(filePath, lineNumber, "Product with ID " + productId + " does not exist.");
+				}
+
+				sales.add(new Sale(product, quantity));
+			}
+
+			if (salesBySalesman.containsKey(salesmanId)) {
+				throw invalidLine(filePath, 1,
+						"More than one sales file was found for " + "salesman document number " + salesmanId + ".");
 			}
 
 			salesBySalesman.put(salesmanId, sales);
 		}
 	}
 
-	/**
-	 * Converts a line from a sales file into a Sale object.
-	 *
-	 * @param line     line containing product ID and quantity
-	 * @param products map containing the available products
-	 * @return the Sale represented by the line
-	 */
-	private Sale parseSale(String line, Map<Integer, Product> products) {
+	private IllegalArgumentException invalidLine(String filePath, int lineNumber, String message) {
 
-		String[] data = line.split(";");
-
-		int productId = Integer.parseInt(data[0]);
-		int quantity = Integer.parseInt(data[1]);
-
-		Product product = products.get(productId);
-
-		if (product == null) {
-			throw new IllegalArgumentException("Product with ID " + productId + " does not exist.");
-		}
-
-		return new Sale(product, quantity);
+		return new IllegalArgumentException("File '" + filePath + "', line " + lineNumber + ": " + message);
 	}
 }

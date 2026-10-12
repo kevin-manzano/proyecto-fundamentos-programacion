@@ -58,15 +58,17 @@ public class Main {
 
 		} catch (IOException e) {
 
-			System.out.println("Error al leer o escribir los archivos: " + e.getMessage());
+			System.err.println("Error de acceso a archivos: " + e.getMessage());
 
 		} catch (IllegalArgumentException e) {
 
-			System.out.println("Error en los datos de entrada: " + e.getMessage());
+			System.err.println("Error en los datos de entrada: " + e.getMessage());
 
 		} catch (Exception e) {
 
-			System.out.println("Ocurrió un error inesperado: " + e.getMessage());
+			System.err.println("Error inesperado: " + e.getMessage());
+			e.printStackTrace();
 		}
+
 	}
 }

@@ -1,61 +1,95 @@
 package proyecto_fundamentos_programacion;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Reads and validates product information from a text file.
+ */
 public class ProductReader {
 
 	/**
-	 * Reads the products from a text file.
-	 *
-	 * Each line of the file must have the following format:
-	 *
-	 * ID;ProductName;UnitPrice
+	 * Reads products from a file using the format: ID;ProductName;UnitPrice
 	 *
 	 * @param filePath path of the products file
-	 * @return a map containing the products indexed by their ID
-	 * @throws IOException if the file cannot be read
+	 * @return products indexed by their IDs
+	 * @throws IOException              if the file cannot be read
+	 * @throws IllegalArgumentException if the data is invalid
 	 */
 	public Map<Integer, Product> readProducts(String filePath) throws IOException {
 
+		File file = new File(filePath);
+
+		if (!file.exists() || !file.isFile()) {
+			throw new IOException("The products file does not exist: " + filePath);
+		}
+
 		Map<Integer, Product> products = new HashMap<Integer, Product>();
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
 			String line;
+			int lineNumber = 0;
 
 			while ((line = reader.readLine()) != null) {
+				lineNumber++;
 
 				if (line.trim().isEmpty()) {
 					continue;
 				}
 
-				Product product = parseProduct(line);
+				String[] data = line.split(";", -1);
 
-				products.put(product.getId(), product);
+				if (data.length != 3) {
+					throw invalidLine(filePath, lineNumber, "Expected 3 fields: ID;Name;Price.");
+				}
+
+				int id;
+				double price;
+
+				try {
+					id = Integer.parseInt(data[0].trim());
+				} catch (NumberFormatException e) {
+					throw invalidLine(filePath, lineNumber, "Product ID must be an integer.");
+				}
+
+				if (id <= 0) {
+					throw invalidLine(filePath, lineNumber, "Product ID must be greater than zero.");
+				}
+
+				String name = data[1].trim();
+
+				if (name.isEmpty()) {
+					throw invalidLine(filePath, lineNumber, "Product name cannot be empty.");
+				}
+
+				try {
+					price = Double.parseDouble(data[2].trim());
+				} catch (NumberFormatException e) {
+					throw invalidLine(filePath, lineNumber, "Product price must be numeric.");
+				}
+
+				if (!Double.isFinite(price) || price < 0) {
+					throw invalidLine(filePath, lineNumber, "Product price must be finite and non-negative.");
+				}
+
+				if (products.containsKey(id)) {
+					throw invalidLine(filePath, lineNumber, "Duplicate product ID: " + id);
+				}
+
+				products.put(id, new Product(id, name, price));
 			}
 		}
 
 		return products;
 	}
 
-	/**
-	 * Converts a line from the products file into a Product object.
-	 *
-	 * @param line line containing product information
-	 * @return the Product represented by the line
-	 */
-	private Product parseProduct(String line) {
+	private IllegalArgumentException invalidLine(String filePath, int lineNumber, String message) {
 
-		String[] data = line.split(";");
-
-		int id = Integer.parseInt(data[0]);
-		String name = data[1];
-		double price = Double.parseDouble(data[2]);
-
-		return new Product(id, name, price);
+		return new IllegalArgumentException("File '" + filePath + "', line " + lineNumber + ": " + message);
 	}
 }

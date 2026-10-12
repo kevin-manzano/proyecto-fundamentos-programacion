@@ -1,0 +1,29 @@
+# CONCLUSIONES DEL PROYECTO
+
+## 1. Aprendizajes adquiridos durante el desarrollo del proyecto
+
+Durante el desarrollo del proyecto fortalecimos nuestros conocimientos relacionados con la programación en Java, especialmente en la organización y estructuración de aplicaciones mediante clases con responsabilidades específicas. Asimismo, comprendimos la importancia de trabajar con archivos de texto para almacenar, leer y procesar información, así como generar reportes en formato CSV.
+
+También reforzamos nuestros conocimientos sobre la relación entre productos, vendedores y ventas, el cálculo del valor total recaudado por cada vendedor y la determinación de las cantidades vendidas por producto. Adicionalmente, reconocimos la importancia de utilizar herramientas como GitHub para gestionar y compartir el código fuente, así como de aplicar buenas prácticas de programación que faciliten la comprensión, el mantenimiento y la evolución del software.
+
+## 2. Aplicaciones de los conocimientos adquiridos en nuestra vida profesional
+
+Los conocimientos y habilidades desarrollados durante este proyecto pueden aplicarse en nuestra vida profesional como ingenieros de software, especialmente en la construcción de soluciones tecnológicas orientadas a la gestión y el procesamiento de información.
+
+Por ejemplo, podemos desarrollar aplicaciones empresariales para administrar inventarios, controlar ventas, analizar el rendimiento comercial y generar informes de manera automatizada. De igual forma, la programación orientada a objetos, el manejo de archivos y el uso de herramientas de control de versiones como GitHub constituyen competencias importantes para desarrollar proyectos y colaborar con otros profesionales.
+
+Además, comprendimos la importancia de escribir código organizado, reutilizable y fácil de mantener, aplicando principios de diseño como los principios SOLID cuando corresponda. Estas habilidades nos permitirán desarrollar soluciones tecnológicas más confiables y adaptables a las necesidades de las organizaciones.
+
+## 3. Dificultades presentadas durante el desarrollo del proyecto
+
+Durante el desarrollo del proyecto se presentaron dificultades relacionadas con la lectura, el procesamiento y la ubicación de los archivos de texto que contienen la información de productos, vendedores y ventas. También tuvimos que trabajar en la asociación correcta de las ventas con los productos correspondientes y en la realización de los cálculos y ordenamientos necesarios para generar los reportes solicitados.
+
+Otra dificultad consistió en distribuir adecuadamente las responsabilidades entre las diferentes clases y métodos, procurando que cada componente cumpliera una función específica. Estas situaciones nos permitieron reconocer la importancia de analizar los requerimientos, verificar las rutas de los archivos, realizar pruebas durante el desarrollo y revisar el código para identificar y corregir posibles errores.
+
+A partir de estas experiencias, comprendimos que el desarrollo de software requiere planificación, capacidad de análisis, perseverancia y verificación constante. Asimismo, reconocimos el valor del trabajo colaborativo y de la documentación como herramientas para mejorar la calidad y facilitar el mantenimiento de las aplicaciones.
+
+## Conclusión general
+
+El desarrollo de este proyecto nos permitió fortalecer nuestros conocimientos de programación en Java y comprender la importancia de estructurar adecuadamente una aplicación para procesar información y generar resultados útiles. Asimismo, logramos relacionar los conceptos teóricos con situaciones que pueden presentarse en entornos empresariales reales.
+
+Aunque todavía existen aspectos que requieren revisión y mejora, la experiencia adquirida constituye una base importante para continuar desarrollando nuestras habilidades en ingeniería de software. En particular, destacamos la importancia de escribir código organizado, validar los datos de entrada, realizar pruebas y aplicar buenas prácticas de programación para construir soluciones confiables y sostenibles.
